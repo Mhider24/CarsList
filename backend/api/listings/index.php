@@ -1,25 +1,34 @@
 <?php
+require_once __DIR__ . "/../../config/db.php";
+
 header("Content-Type: application/json");
 
-$listings = [
-    [
-        "id" => 1,
-        "make" => "Honda",
-        "model" => "Civic",
-        "year" => 2018,
-        "price" => 14500,
-        "mileage" => 82000,
-        "title_status" => "Clean"
-    ],
-    [
-        "id" => 2,
-        "make" => "Ford",
-        "model" => "Fusion",
-        "year" => 2016,
-        "price" => 9900,
-        "mileage" => 110000,
-        "title_status" => "Rebuilt"
-    ]
-];
+$query = "
+    SELECT 
+        listings.id,
+        listings.make,
+        listings.model,
+        listings.year,
+        listings.price,
+        listings.mileage,
+        listings.title_status,
+        listings.transmission,
+        listings.fuel_type,
+        listings.image_url,
+        users.name AS seller_name
+    FROM listings
+    JOIN users ON listings.seller_id = users.id
+    ORDER BY listings.created_at DESC
+";
 
-echo json_encode($listings);
+try {
+    $stmt = $pdo->query($query);
+    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    echo json_encode($data);
+
+} catch (PDOException $e) {
+    echo json_encode([
+        "error" => "Failed to fetch listings"
+    ]);
+}
