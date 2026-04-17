@@ -41,3 +41,43 @@ function validateListing($data) {
 
     return $errors;
 }
+
+function validateRegister($data) {
+    $errors = [];
+
+    if (!isset($data["name"]) || trim($data["name"]) === "") {
+        $errors[] = "name is required";
+    }
+
+    if (!isset($data["email"]) || trim($data["email"]) === "") {
+        $errors[] = "email is required";
+    } elseif (!filter_var($data["email"], FILTER_VALIDATE_EMAIL)) {
+        $errors[] = "valid email is required";
+    }
+
+    if (!isset($data["password"]) || trim($data["password"]) === "") {
+        $errors[] = "password is required";
+    } elseif (strlen($data["password"]) < 6) {
+        $errors[] = "password must be at least 6 characters";
+    }
+
+    if (!isset($data["role"]) || trim($data["role"]) === "") {
+        $errors[] = "role is required";
+    }
+
+    return $errors;
+}
+
+function validateLogin($data) {
+    $errors = [];
+
+    if (!isset($data["email"]) || trim($data["email"]) === "") {
+        $errors[] = "email is required";
+    }
+
+    if (!isset($data["password"]) || trim($data["password"]) === "") {
+        $errors[] = "password is required";
+    }
+
+    return $errors;
+}
