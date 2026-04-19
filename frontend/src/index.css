@@ -4,7 +4,7 @@
   --bg: #fff;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
-  --accent: #aa3bff;
+  --accent: #722F37;
   --accent-bg: rgba(170, 59, 255, 0.1);
   --accent-border: rgba(170, 59, 255, 0.5);
   --social-bg: rgba(244, 243, 236, 0.5);
@@ -30,6 +30,108 @@
   }
 }
 
+.listing-card{
+  width: 100%;
+  border-radius: 4px;
+}
+
+.card-info{
+  margin-top: 10px;
+}
+
+.form{
+  display: flex;
+  flex-direction: column;
+  gap: 15px
+}
+
+.create-listing-page {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+button {
+  color: var(--primary-color);
+  border-radius: 8px;
+  border: 2px solid var(--primary-color);
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: var(--accent);
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+.btn {
+  background-color: #8b0000; 
+  color: #ffffff;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px; 
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none; 
+  display: inline-block;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn:hover {
+  background-color: #660000;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.seller-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.seller-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.seller-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  flex-wrap: wrap;
+}
+
+.sold-card {
+  opacity: 0.6;
+  background-color: #f9f9f9;
+  border-color: #27ae60;
+}
+
+.auth-container {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 20px;
+  border: 1px solid black;
+  border-radius: 8px;
+}
+
+.auth-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.auth-container input {
+  padding: 12px;
+  border: 1px solid black;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --text: #9ca3af;
@@ -37,7 +139,7 @@
     --bg: #16171d;
     --border: #2e303a;
     --code-bg: #1f2028;
-    --accent: #c084fc;
+    --accent: #722F37;
     --accent-bg: rgba(192, 132, 252, 0.15);
     --accent-border: rgba(192, 132, 252, 0.5);
     --social-bg: rgba(47, 48, 58, 0.5);
