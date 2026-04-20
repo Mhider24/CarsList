@@ -1,44 +1,69 @@
 import { Link } from "react-router-dom";
 
-function Listing ({ vehicleData }) {
-    const { id, image, make, model, mileage, price } = vehicleData;
+function Listings({ listing, onFavoriteToggle, isFavorite = false }) {
+  const user = JSON.parse(localStorage.getItem("currentUser"));
 
-    const addFavorite = () => {
-  fetch("http://localhost/CarsList/backend/api/favorites/add.php", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ 
-      //user_id: 1, DummyID
-      listing_id: vehicleData.id 
-    }),
-  })
-    .then(() => alert("Added to favorites!"))
-    .catch((error) => console.error("Error adding favorite:", error));
-};
+  function handleFavoriteClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user || user.role !== "buyer") {
+      alert("Please log in as a buyer to manage favorites.");
+      return;
+    }
+
+    onFavoriteToggle(listing.id, isFavorite);
+  }
 
   return (
-    <article className="listing-card">
-      {/* placeholder image */}
-      <img 
-        src={image || "https://via.placeholder.com/300x200?text=No+Vehicle+Image"} 
-        alt={`${make} ${model}`} 
+    <div
+      className="listing-card"
+      style={{
+        border: "1px solid #ddd",
+        borderRadius: "10px",
+        padding: "16px",
+        backgroundColor: "#fff",
+      }}
+    >
+      <img
+        src={listing.image_url || "https://via.placeholder.com/300x180?text=No+Image"}
+        alt={`${listing.year} ${listing.make} ${listing.model}`}
+        style={{
+          width: "100%",
+          height: "180px",
+          objectFit: "cover",
+          borderRadius: "8px",
+        }}
       />
-      
+
       <div className="card-info">
-        <h2>{make} {model}</h2>
-        <p><strong>Mileage:</strong> {mileage}</p>
-        <p className="price">${price}</p>
-        
-        {/* React Router's Link safely navigates to the details page without refreshing the browser */}
-        <Link to={`/listing/${id}`}>
-          <button>View Details</button>
-          <button onClick={addFavorite} className="btn">Favorite</button>
-        </Link>
+        <h2>
+          {listing.year} {listing.make} {listing.model}
+        </h2>
+        <p>
+          <strong>Price:</strong> ${Number(listing.price).toLocaleString()}
+        </p>
+        <p>
+          <strong>Mileage:</strong> {Number(listing.mileage).toLocaleString()} miles
+        </p>
+        <p>
+          <strong>Title:</strong> {listing.title_status}
+        </p>
       </div>
-    </article>
+
+      <div style={{ display: "flex", gap: "10px", marginTop: "14px", flexWrap: "wrap" }}>
+        <Link to={`/listing/${listing.id}`}>
+          <button className="btn">View Details</button>
+        </Link>
+
+        {user?.role === "buyer" && (
+          <button className="btn" onClick={handleFavoriteClick}>
+            {isFavorite ? "Remove Favorite" : "Add Favorite"}
+          </button>
+        )}
+      </div>
+    </div>
   );
 }
 
-export default Listing;
+export default Listings;

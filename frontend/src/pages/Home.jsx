@@ -1,46 +1,91 @@
-import { useState, useEffect } from "react";
-import Listing from "../pages/Listings";
+import { useEffect, useState } from "react";
+import Listings from "./Listings";
 
 function Home() {
   const [listings, setListings] = useState([]);
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+
+  async function loadListings() {
+    try {
+      const response = await fetch("/CarsList/backend/api/listings/index.php");
+      const data = await response.json();
+
+      if (Array.isArray(data)) {
+        setListings(data);
+      } else if (Array.isArray(data.listings)) {
+        setListings(data.listings);
+      } else {
+        setListings([]);
+        setMessage("No listings found.");
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+      setMessage(`Error loading vehicles: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    fetch("http://localhost/CarsList/backend/api/listings/index.php")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setListings(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Fetch error:", err);
-        setError(err.message);
-        setLoading(false);
-      });
+    loadListings();
   }, []);
 
-  //Waiting for the PHP server
-  if (loading) return <div>Loading vehicles...</div>;
-  
-  //If the database connection fails
-  if (error) return <div>Error loading vehicles: {error}</div>;
+  async function handleFavoriteToggle(listingId, isFavorite) {
+    const user = JSON.parse(localStorage.getItem("currentUser"));
+
+    if (!user || user.role !== "buyer") {
+      alert("Please log in as a buyer first.");
+      return;
+    }
+
+    const url = isFavorite
+      ? "/CarsList/backend/api/favorites/remove.php"
+      : "/CarsList/backend/api/favorites/add.php";
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: user.id,
+          listing_id: listingId,
+        }),
+      });
+
+      const data = await response.json();
+      alert(data.message || "Favorite updated.");
+    } catch (error) {
+      alert("Could not update favorite.");
+    }
+  }
 
   return (
-    <main className="home-page">
-      <h1>Vehicles for Sale</h1>
-      
-      <section className="listings-grid">
-        {listings.map((vehicle) => (
-          <Listing key={vehicle.id} vehicleData={vehicle} />
+    <div style={{ padding: "20px" }}>
+      <h1>Browse Listings</h1>
+
+      {loading && <p>Loading vehicles...</p>}
+      {message && <p>{message}</p>}
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+          gap: "20px",
+          marginTop: "20px",
+        }}
+      >
+        {listings.map((listing) => (
+          <Listings
+            key={listing.id}
+            listing={listing}
+            onFavoriteToggle={handleFavoriteToggle}
+          />
         ))}
-      </section>
-    </main>
+      </div>
+    </div>
   );
 }
 

@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-function CreateListing() {
+function EditListing() {
+  const { id } = useParams();
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("currentUser"));
 
@@ -19,6 +20,7 @@ function CreateListing() {
     image_url: "",
   });
 
+  const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
 
@@ -62,6 +64,53 @@ function CreateListing() {
     }
   }
 
+  async function loadListing() {
+    if (!user || user.role !== "seller") {
+      setMessage("You must be logged in as a seller.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`/CarsList/backend/api/listings/show.php?id=${id}`);
+      const data = await response.json();
+
+      if (!data || !data.id) {
+        setMessage("Listing not found.");
+        setLoading(false);
+        return;
+      }
+
+      if (Number(data.seller_id) !== Number(user.id)) {
+        setMessage("You are not allowed to edit this listing.");
+        setLoading(false);
+        return;
+      }
+
+      setFormData({
+        make: data.make || "",
+        model: data.model || "",
+        year: data.year || "",
+        price: data.price || "",
+        mileage: data.mileage || "",
+        color: data.color || "",
+        title_status: data.title_status || "",
+        transmission: data.transmission || "",
+        fuel_type: data.fuel_type || "",
+        description: data.description || "",
+        image_url: data.image_url || "",
+      });
+    } catch (error) {
+      setMessage("Could not load listing.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadListing();
+  }, [id]);
+
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -71,6 +120,7 @@ function CreateListing() {
     }
 
     const payload = {
+      id: Number(id),
       seller_id: user.id,
       make: formData.make,
       model: formData.model,
@@ -86,7 +136,7 @@ function CreateListing() {
     };
 
     try {
-      const response = await fetch("/CarsList/backend/api/listings/create.php", {
+      const response = await fetch("/CarsList/backend/api/listings/update.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -97,28 +147,37 @@ function CreateListing() {
       const data = await response.json();
 
       if (data.success) {
-        alert("Listing created successfully.");
+        alert("Listing updated successfully.");
         navigate("/seller-dashboard");
       } else {
-        setMessage(data.message || "Could not create listing.");
+        setMessage(data.message || "Could not update listing.");
       }
     } catch (error) {
-      setMessage("Server error while creating listing.");
+      setMessage("Server error while updating listing.");
     }
   }
 
   if (!user || user.role !== "seller") {
     return (
       <div style={{ padding: "20px" }}>
-        <h1>Create Listing</h1>
+        <h1>Edit Listing</h1>
         <p>Please log in as a seller first.</p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div style={{ padding: "20px" }}>
+        <h1>Edit Listing</h1>
+        <p>Loading listing...</p>
       </div>
     );
   }
 
   return (
     <div className="create-listing-page">
-      <h1>Create Listing</h1>
+      <h1>Edit Listing</h1>
 
       <form className="form" onSubmit={handleSubmit}>
         <input name="make" placeholder="Make" value={formData.make} onChange={handleChange} required />
@@ -172,7 +231,7 @@ function CreateListing() {
         )}
 
         <button type="submit" className="btn">
-          Create Listing
+          Save Changes
         </button>
       </form>
 
@@ -181,4 +240,4 @@ function CreateListing() {
   );
 }
 
-export default CreateListing;
+export default EditListing;
